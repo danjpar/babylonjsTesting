@@ -38,6 +38,8 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     var alpha = Math.PI;
 
     cube = BABYLON.MeshBuilder.CreateBox('cube', {  }, scene);
+    cube.scaling.y = 2;
+    cube.bakeCurrentTransformIntoVertices();
     cube.position.x = Math.sin(alpha)*10;
     cube.position.z = Math.cos(alpha)*10;
     cube.computeWorldMatrix(true);
@@ -46,19 +48,19 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
 
     observer = scene.onBeforeRenderObservable.add(animate);
     function animate() {
-        alpha+=.05;
+        alpha += Math.PI/120;
         cube.position.x = Math.sin(alpha)*10;
         cube.position.z = Math.cos(alpha)*10;
         cube.rotation.x = Math.PI*alpha/2;
         cube.rotation.y = alpha;
         if (alpha >= Math.PI*9) {alpha = alpha - Math.PI*8;}
     }
-
+/*
     setTimeout(function() {
         scene.onBeforeRenderObservable.remove(observer);
         newTrail.stop()
     }, 5000);
-
+*/
     var renderLoop = function () {
         scene.render();
     };
