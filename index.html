@@ -37,19 +37,29 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     
     var cylinder = BABYLON.MeshBuilder.CreateCylinder('cylinder', { diameter:2, tessellation:6 }, scene);
     cylinder.position.y += 1;
+    //cylinder.computeWorldMatrix();
     var sphere = BABYLON.MeshBuilder.CreateSphere('sphere', { diameter:2 }, scene);
     sphere.position.y += 3;
+    //sphere.computeWorldMatrix();
     var cube1 = BABYLON.MeshBuilder.CreateBox('cube1', {  }, scene);
     cube1.position.y += 4;
     cube1.position.x -= 1;
+    //cube1.computeWorldMatrix();
     var cube2 = BABYLON.MeshBuilder.CreateBox('cube2', {  }, scene);
     cube2.position.y += 4;
     cube2.position.x += 1;
-    var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 6, height: 4, subdivsions: 4}, scene);     
-    var toExplode = BABYLON.Mesh.MergeMeshes([cylinder, sphere, cube1, cube2, ground], true, undefined, undefined, true);
+    var cube3 = BABYLON.MeshBuilder.CreateBox('cube2', {  }, scene);
+    cube3.position.y += 3;
+    cube3.position.z += 1;
+    //cube2.computeWorldMatrix();
+    var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 6, height: 4, subdivsions: 4}, scene);
+    //ground.computeWorldMatrix();
+    var toExplode = BABYLON.Mesh.MergeMeshes([cylinder, sphere, cube1, cube2, cube3, ground], true, undefined, undefined, true);
     toExplode.material = sourceMat;
     //toExplode.position.x += 6;
     //toExplode.bakeCurrentTransformIntoVertices();
+
+    var absCenter = toExplode._boundingInfo.boundingBox.centerWorld;
 
     var otherVertexData = BABYLON.VertexData.ExtractFromMesh(toExplode, true, true);
     var indices = otherVertexData.indices;
@@ -68,9 +78,9 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
         for (var subIndex = 0; subIndex < newI.length; subIndex++) {
             newI[subIndex] = newI[subIndex] - toExplode.subMeshes[index].verticesStart;
         }
-        
+
         BABYLON.VertexData.ComputeNormals(newP, newI, newN);
-        
+
         newVertexData.indices = newI;
         newVertexData.normals = newN;
         newVertexData.positions = newP;
@@ -79,16 +89,47 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
         var meshSubclass = new BABYLON.Mesh('new-'+index, scene);
         
         newVertexData.applyToMesh(meshSubclass);
-        
-        meshSubclass.position.x -= 6;
-        
+                
         newMeshArray.push(meshSubclass);
 
     }
-
+    toExplode.visibility = 0;
+    var centerMesh = findCenterMesh(newMeshArray);
+    moveRest(centerMesh, newMeshArray);
+    /*
     for (var index = 0; index < newMeshArray.length; index++) {
-        bottomMesh = findBottom(newMeshArray);
+        var bottomMesh = findBottom(newMeshArray);
         moveRest(bottomMesh, newMeshArray);
+    }
+    */
+    function findCenterMesh(arr) {
+        var centerMesh;
+        var centerMeshIndex = 0;
+        var distanceToCenter = Number.MAX_VALUE;
+        for (var index = 0; index < arr.length; index++) {
+            var v1 = absCenter;
+            var v2 = arr[index]._boundingInfo.boundingBox.centerWorld;
+            var v0 = v2.subtract(v1);
+            var v3 = v0.length();
+            if (v3 < distanceToCenter) {
+                centerMesh = arr[index];
+                distanceToCenter = v3;
+                centerMeshIndex = index;
+            }
+        }
+        arr.splice(centerMeshIndex, 1);
+        return centerMesh;
+    }
+    //moveAll(newMeshArray);
+    function moveAll(arr) {
+        for (var index = 0; index < arr.length; index++) {
+            var v1 = absCenter;
+            var v2 = arr[index]._boundingInfo.boundingBox.centerWorld;
+            var v0 = v2.subtract(v1);
+            var v3 = v0.length();
+            v0.normalize();
+            arr[index].translate(v0, v3, BABYLON.Space.WORLD);
+        }
     }
 
     function findBottom(arr) {
@@ -109,8 +150,9 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
             var v1 = mesh._boundingInfo.boundingBox.centerWorld;
             var v2 = arr[index]._boundingInfo.boundingBox.centerWorld;
             var v0 = v2.subtract(v1);
+            var v3 = v0.length();
             v0.normalize();
-            arr[index].translate(v0, 1, BABYLON.Space.WORLD);
+            arr[index].translate(v0, v3, BABYLON.Space.WORLD);
         }
     }
 /*
