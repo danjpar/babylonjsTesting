@@ -41,10 +41,10 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     cube.position.y += 2;
     var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 6, height: 4, subdivsions: 4}, scene);     
     //plane.material = sourceMat;
-    var toExplode = BABYLON.Mesh.MergeMeshes([sphere.clone(), cube.clone(), ground.clone()], true, undefined, undefined, true);
+    var toExplode = BABYLON.Mesh.MergeMeshes([sphere, cube, ground], true, undefined, undefined, true);
     toExplode.material = sourceMat;
-    toExplode.position.x += 6;
-    
+    //toExplode.position.x += 6;
+    //toExplode.bakeCurrentTransformIntoVertices();
 
     var otherVertexData = BABYLON.VertexData.ExtractFromMesh(toExplode, true, true);
     var indices = otherVertexData.indices;
