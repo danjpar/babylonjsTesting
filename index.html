@@ -12,6 +12,10 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
 <canvas id='render-canvas'></canvas>
 <script>
     var canvas = document.getElementById('render-canvas');
+    window.onresize = function(){
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    };
     var engine = new BABYLON.Engine(canvas);
     engine.enableOfflineSupport = false;
 
@@ -34,30 +38,23 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     var sourceMat = new BABYLON.StandardMaterial('sourceMat', scene);
     sourceMat.diffuseColor = new BABYLON.Color3.Black();
     sourceMat.backFaceCulling = false;
-    
+    var alpha = Math.PI;
+    var toExplodeArray = [];
     var cylinder = BABYLON.MeshBuilder.CreateCylinder('cylinder', { diameter:2, tessellation:6 }, scene);
-    cylinder.position.y += 1;
-    //cylinder.computeWorldMatrix();
+
+    toExplodeArray.push(cylinder);
     var sphere = BABYLON.MeshBuilder.CreateSphere('sphere', { diameter:2 }, scene);
-    sphere.position.y += 3;
-    //sphere.computeWorldMatrix();
-    var cube1 = BABYLON.MeshBuilder.CreateBox('cube1', {  }, scene);
-    cube1.position.y += 4;
-    cube1.position.x -= 1;
-    //cube1.computeWorldMatrix();
-    var cube2 = BABYLON.MeshBuilder.CreateBox('cube2', {  }, scene);
-    cube2.position.y += 4;
-    cube2.position.x += 1;
-    var cube3 = BABYLON.MeshBuilder.CreateBox('cube2', {  }, scene);
-    cube3.position.y += 3;
-    cube3.position.z += 1;
-    //cube2.computeWorldMatrix();
-    var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 6, height: 4, subdivsions: 4}, scene);
-    //ground.computeWorldMatrix();
-    var toExplode = BABYLON.Mesh.MergeMeshes([cylinder, sphere, cube1, cube2, cube3, ground], true, undefined, undefined, true);
-    toExplode.material = sourceMat;
-    //toExplode.position.x += 6;
-    //toExplode.bakeCurrentTransformIntoVertices();
+    sphere.position.y += 2;
+    toExplodeArray.push(sphere);
+    for (var alpha = Math.PI; alpha < 10; alpha+=Math.PI/10) {
+        var cube1 = BABYLON.MeshBuilder.CreateSphere('sphere-'+alpha, { diameter:.5 }, scene);
+        cube1.position.y = 2;
+        cube1.position.z = Math.cos(alpha)*1.25;
+        cube1.position.x = Math.sin(alpha)*1.25;
+        toExplodeArray.push(cube1);
+    }
+    var toExplode = BABYLON.Mesh.MergeMeshes(toExplodeArray, true, undefined, undefined, true);
+    toExplode.material = sourceMat
 
     var absCenter = toExplode._boundingInfo.boundingBox.centerWorld;
 
@@ -93,23 +90,16 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
         newMeshArray.push(meshSubclass);
 
     }
-    toExplode.visibility = 0;
+    toExplode.position.x += 6;
     var centerMesh = findCenterMesh(newMeshArray);
     moveRest(centerMesh, newMeshArray);
-    /*
-    for (var index = 0; index < newMeshArray.length; index++) {
-        var bottomMesh = findBottom(newMeshArray);
-        moveRest(bottomMesh, newMeshArray);
-    }
-    */
     function findCenterMesh(arr) {
         var centerMesh;
         var centerMeshIndex = 0;
         var distanceToCenter = Number.MAX_VALUE;
         for (var index = 0; index < arr.length; index++) {
-            var v1 = absCenter;
-            var v2 = arr[index]._boundingInfo.boundingBox.centerWorld;
-            var v0 = v2.subtract(v1);
+            var v1 = arr[index]._boundingInfo.boundingBox.centerWorld;
+            var v0 = v1.subtract(absCenter);
             var v3 = v0.length();
             if (v3 < distanceToCenter) {
                 centerMesh = arr[index];
@@ -123,9 +113,8 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     //moveAll(newMeshArray);
     function moveAll(arr) {
         for (var index = 0; index < arr.length; index++) {
-            var v1 = absCenter;
-            var v2 = arr[index]._boundingInfo.boundingBox.centerWorld;
-            var v0 = v2.subtract(v1);
+            var v1 = arr[index]._boundingInfo.boundingBox.centerWorld;
+            var v0 = v1.subtract(absCenter);
             var v3 = v0.length();
             v0.normalize();
             arr[index].translate(v0, v3, BABYLON.Space.WORLD);
@@ -156,7 +145,35 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
         }
     }
 /*
+    toExplode.visibility = 0;
+    //sphere.computeWorldMatrix();
+    var cube1 = BABYLON.MeshBuilder.CreateBox('cube1', {  }, scene);
+    cube1.position.y += 2;
+    cube1.position.x += 2;
+    //cube1.computeWorldMatrix();
+    var cube2 = BABYLON.MeshBuilder.CreateBox('cube2', {  }, scene);
+    cube2.position.y += 4;
+    cube2.position.x += 1;
+    var cube3 = BABYLON.MeshBuilder.CreateBox('cube2', {  }, scene);
+    cube3.position.y += 3;
+    cube3.position.z += 1;
 
+    //cube2.computeWorldMatrix();
+    var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 6, height: 4, subdivsions: 4}, scene);
+    //ground.computeWorldMatrix();
+    var toExplode = BABYLON.Mesh.MergeMeshes([cylinder, sphere, cube1, cube2, cube3, ground], true, undefined, undefined, true);
+    toExplode.material = sourceMat;
+    //toExplode.position.x += 6;
+    //toExplode.bakeCurrentTransformIntoVertices();
+
+
+
+    var centerMesh = findCenterMesh(newMeshArray);
+    moveRest(centerMesh, newMeshArray);
+    for (var index = 0; index < newMeshArray.length; index++) {
+        var bottomMesh = findBottom(newMeshArray);
+        moveRest(bottomMesh, newMeshArray);
+    }
     var alpha = Math.PI;
     // Create a mesh for the trail to follow.
     var cube = BABYLON.MeshBuilder.CreateBox('cube', {  }, scene);
