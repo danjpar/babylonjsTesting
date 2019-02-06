@@ -55,6 +55,7 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     var cube4 = BABYLON.MeshBuilder.CreateBox('cube3', {  }, scene);
     cube4.position.y += 7.5;
     toExplodeArray.push(cube4);
+    cube4.subdivide(6);
     var cube11 = BABYLON.MeshBuilder.CreateBox('cube11', {  }, scene);
     cube11.position.z += 1.25;
     toExplodeArray.push(cube11);
@@ -64,6 +65,7 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     var sphere1 = BABYLON.MeshBuilder.CreateSphere('sphere1', { segments:12, diameter:2 }, scene);
     sphere1.position.y += 2;
     toExplodeArray.push(sphere1);
+    sphere1.subdivide(6);
     var sphere2 = BABYLON.MeshBuilder.CreateSphere('sphere2', { segments:12, diameter:3 }, scene);
     sphere2.position.y += 5.5;
     toExplodeArray.push(sphere2);
@@ -84,14 +86,18 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
         sphere3.position.x -= .5+.3725*count;
         toExplodeArray.push(sphere3);
     }
-    var toExplode = BABYLON.Mesh.MergeMeshes(toExplodeArray, true, undefined, undefined, true);
-    toExplode.material = sourceMat
+/*
+    var toExplode = BABYLON.Mesh.MergeMeshes(toExplodeArray, false, undefined, undefined, true);
+    toExplode.material = sourceMat;
     var absCenter = toExplode._boundingInfo.boundingBox.centerWorld;
-
-    var newMeshArray = deconstructMesh(toExplode);
-
     toExplode.position.x += 8;
-
+    var newMeshArray = deconstructMesh(toExplode);
+*/
+    var toExplode2 = BABYLON.Mesh.MergeMeshes(toExplodeArray, true, undefined, undefined, undefined, true);
+    toExplode2.material = sourceMat;
+    var absCenter = toExplode2._boundingInfo.boundingBox.centerWorld;
+    toExplode2.position.x -= 8;
+    var newMeshArray = deconstructMesh(toExplode2);
     var centerMesh = findCenterMesh(newMeshArray);
     moveRest(centerMesh, newMeshArray);
 
@@ -126,7 +132,6 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     
     function deconstructMesh(mesh) {
         if (mesh.subMeshes.length > 1) {
-
             var otherVertexData = BABYLON.VertexData.ExtractFromMesh(mesh, true, true);
             var indices = otherVertexData.indices;
             var normals = otherVertexData.normals;
