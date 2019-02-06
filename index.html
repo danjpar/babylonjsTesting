@@ -53,21 +53,37 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     cube3.position.y += 3.5;
     cube3.position.x -= 1;
     toExplodeArray.push(cube3);
+    var cube4 = BABYLON.MeshBuilder.CreateBox('cube3', {  }, scene);
+    cube4.position.y += 7.5;
+    toExplodeArray.push(cube4);
     var cube11 = BABYLON.MeshBuilder.CreateBox('cube11', {  }, scene);
     cube11.position.z += 1.25;
     toExplodeArray.push(cube11);
     var cube22 = BABYLON.MeshBuilder.CreateBox('cube22', {  }, scene);
     cube22.position.z -= 1.25;
     toExplodeArray.push(cube22);
-    var sphere = BABYLON.MeshBuilder.CreateSphere('sphere', { diameter:2 }, scene);
-    sphere.position.y += 2;
-    toExplodeArray.push(sphere);
+    var sphere1 = BABYLON.MeshBuilder.CreateSphere('sphere1', { segments:12, diameter:2 }, scene);
+    sphere1.position.y += 2;
+    toExplodeArray.push(sphere1);
+    var sphere2 = BABYLON.MeshBuilder.CreateSphere('sphere2', { segments:12, diameter:3 }, scene);
+    sphere2.position.y += 5.5;
+    toExplodeArray.push(sphere2);
     for (var alpha = 0; alpha < Math.PI*2; alpha+=Math.PI/10) {
-        var sphere0 = BABYLON.MeshBuilder.CreateSphere('sphere0', { diameter:.5 }, scene);
+        var sphere0 = BABYLON.MeshBuilder.CreateSphere('sphere0', { segments:8, diameter:.5 }, scene);
         sphere0.position.y = 2;
         sphere0.position.z = Math.cos(alpha)*1.25;
         sphere0.position.x = Math.sin(alpha)*1.25;
         toExplodeArray.push(sphere0);
+    }
+    for (var count = 1; count < 10; count+=2) {
+        var sphere2 = BABYLON.MeshBuilder.CreateSphere('sphere2', { segments:8, diameter:.75 }, scene);
+        sphere2.position.z += 1.25;
+        sphere2.position.x += .5+.3725*count;
+        toExplodeArray.push(sphere2);
+        var sphere3 = BABYLON.MeshBuilder.CreateSphere('sphere3', { segments:8, diameter:.75 }, scene);
+        sphere3.position.z -= 1.25;
+        sphere3.position.x -= .5+.3725*count;
+        toExplodeArray.push(sphere3);
     }
     var toExplode = BABYLON.Mesh.MergeMeshes(toExplodeArray, true, undefined, undefined, true);
     toExplode.material = sourceMat
@@ -106,7 +122,8 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
         newMeshArray.push(meshSubclass);
 
     }
-    toExplode.position.x += 6;
+    toExplode.position.x += 8;
+
     var centerMesh = findCenterMesh(newMeshArray);
     moveRest(centerMesh, newMeshArray);
 
@@ -127,6 +144,23 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
         arr.splice(centerMeshIndex, 1);
         return centerMesh;
     }
+
+    function moveRest(mesh, arr) {
+        for (var index = 0; index < arr.length; index++) {
+            var v1 = mesh._boundingInfo.boundingBox.centerWorld;
+            var v2 = arr[index]._boundingInfo.boundingBox.centerWorld;
+            var v0 = v2.subtract(v1);
+            var v3 = v0.length();
+            v0.normalize();
+            arr[index].translate(v0, v3, BABYLON.Space.WORLD);
+        }
+    }
+/*
+    for (var index = 0; index < newMeshArray.length; index++) {
+        var bottomMesh = findBottom(newMeshArray);
+        moveRest(bottomMesh, newMeshArray);
+    }
+
     //moveAll(newMeshArray);
     function moveAll(arr) {
         for (var index = 0; index < arr.length; index++) {
@@ -151,23 +185,6 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
         return bottomMesh;
     }
 
-    function moveRest(mesh, arr) {
-        for (var index = 0; index < arr.length; index++) {
-            var v1 = mesh._boundingInfo.boundingBox.centerWorld;
-            var v2 = arr[index]._boundingInfo.boundingBox.centerWorld;
-            var v0 = v2.subtract(v1);
-            var v3 = v0.length();
-            v0.normalize();
-            arr[index].translate(v0, v3, BABYLON.Space.WORLD);
-        }
-    }
-/*
-    for (var index = 0; index < newMeshArray.length; index++) {
-        var bottomMesh = findBottom(newMeshArray);
-        moveRest(bottomMesh, newMeshArray);
-    }
-
-    
     var alpha = Math.PI;
     // Create a mesh for the trail to follow.
     var cube = BABYLON.MeshBuilder.CreateBox('cube', {  }, scene);
