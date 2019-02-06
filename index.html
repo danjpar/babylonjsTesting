@@ -38,7 +38,6 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     var sourceMat = new BABYLON.StandardMaterial('sourceMat', scene);
     sourceMat.diffuseColor = new BABYLON.Color3.Black();
     sourceMat.backFaceCulling = false;
-    var alpha = Math.PI;
     var toExplodeArray = [];
     var cylinder = BABYLON.MeshBuilder.CreateCylinder('cylinder', { diameter:2, tessellation:6 }, scene);
     toExplodeArray.push(cylinder);
@@ -87,41 +86,10 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     }
     var toExplode = BABYLON.Mesh.MergeMeshes(toExplodeArray, true, undefined, undefined, true);
     toExplode.material = sourceMat
-
     var absCenter = toExplode._boundingInfo.boundingBox.centerWorld;
 
-    var otherVertexData = BABYLON.VertexData.ExtractFromMesh(toExplode, true, true);
-    var indices = otherVertexData.indices;
-    var normals = otherVertexData.normals;
-    var positions = otherVertexData.positions;
-    var uvs = otherVertexData.uvs;
-    var newMeshArray = [];
-    for (var index = 0; index < toExplode.subMeshes.length; index++) {
-        
-        var newVertexData = new BABYLON.VertexData();
-        
-        var newI = indices.slice(toExplode.subMeshes[index].indexStart, toExplode.subMeshes[index].indexStart+toExplode.subMeshes[index].indexCount);
-        var newP = positions.slice(toExplode.subMeshes[index].verticesStart * 3, toExplode.subMeshes[index].verticesStart * 3 + toExplode.subMeshes[index].verticesCount * 3);
-        var newU = uvs.slice(toExplode.subMeshes[index].verticesStart * 2, toExplode.subMeshes[index].verticesStart * 2 + toExplode.subMeshes[index].verticesCount * 2);
-        var newN = [];
-        for (var subIndex = 0; subIndex < newI.length; subIndex++) {
-            newI[subIndex] = newI[subIndex] - toExplode.subMeshes[index].verticesStart;
-        }
+    var newMeshArray = deconstructMesh(toExplode);
 
-        BABYLON.VertexData.ComputeNormals(newP, newI, newN);
-
-        newVertexData.indices = newI;
-        newVertexData.normals = newN;
-        newVertexData.positions = newP;
-        newVertexData.uvs = newU;
-        
-        var meshSubclass = new BABYLON.Mesh('new-'+index, scene);
-        
-        newVertexData.applyToMesh(meshSubclass);
-                
-        newMeshArray.push(meshSubclass);
-
-    }
     toExplode.position.x += 8;
 
     var centerMesh = findCenterMesh(newMeshArray);
@@ -153,6 +121,46 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
             var v3 = v0.length();
             v0.normalize();
             arr[index].translate(v0, v3, BABYLON.Space.WORLD);
+        }
+    }
+    
+    function deconstructMesh(mesh) {
+        if (mesh.subMeshes.length > 1) {
+
+            var otherVertexData = BABYLON.VertexData.ExtractFromMesh(mesh, true, true);
+            var indices = otherVertexData.indices;
+            var normals = otherVertexData.normals;
+            var positions = otherVertexData.positions;
+            var uvs = otherVertexData.uvs;
+            var newMeshArray = [];
+            for (var index = 0; index < mesh.subMeshes.length; index++) {
+                var newVertexData = new BABYLON.VertexData();
+                
+                var newI = indices.slice(mesh.subMeshes[index].indexStart, mesh.subMeshes[index].indexStart+mesh.subMeshes[index].indexCount);
+                var newP = positions.slice(mesh.subMeshes[index].verticesStart * 3, mesh.subMeshes[index].verticesStart * 3 + mesh.subMeshes[index].verticesCount * 3);
+                var newU = uvs.slice(mesh.subMeshes[index].verticesStart * 2, mesh.subMeshes[index].verticesStart * 2 + mesh.subMeshes[index].verticesCount * 2);
+                var newN = [];
+                for (var subIndex = 0; subIndex < newI.length; subIndex++) {
+                    newI[subIndex] = newI[subIndex] - mesh.subMeshes[index].verticesStart;
+                }
+
+                BABYLON.VertexData.ComputeNormals(newP, newI, newN);
+
+                newVertexData.indices = newI;
+                newVertexData.normals = newN;
+                newVertexData.positions = newP;
+                newVertexData.uvs = newU;
+                
+                var meshSubclass = new BABYLON.Mesh('new-'+index, scene);
+                
+                newVertexData.applyToMesh(meshSubclass);
+                        
+                newMeshArray.push(meshSubclass);
+
+            }
+            return newMeshArray;
+        } else {
+            return [mesh];
         }
     }
 /*
