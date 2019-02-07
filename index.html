@@ -5,12 +5,33 @@
 <title>Babylon.js demo</title>
 <style>
 html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 0; }
+#slidecontainer { position:absolute;background:rgba(0,0,0,0.4);bottom:0; }
+#slider {display:none;}
 </style>
 </head>
 <body>
+
+<div id='slidecontainer'>
+    <button onclick='document.getElementById("slider").style.display = "block";this.style.display = "none"; newArray = BABYLON.Mesh.Explode(toExplodeArray);'>Explode</button>
+<input id='slider' type='range' min='0' max='5' value='1'>
+</div>
+
 <script src='babylon.max.js'></script>
 <canvas id='render-canvas'></canvas>
 <script>
+    var newArray;
+    var slider = document.getElementById('slider');
+    var lastPos = slider.value;
+    slider.oninput = function() {
+        if (lastPos == slider.value*1 - 1) {
+            newArray = BABYLON.Mesh.Explode(newArray);
+        } else if (lastPos == slider.value*1 + 1) {
+            newArray = BABYLON.Mesh.Explode(newArray, undefined, undefined, true);
+        }
+        lastPos = slider.value;
+    };
+    
+
     var canvas = document.getElementById('render-canvas');
     window.onresize = function(){
         canvas.width = window.innerWidth;
@@ -93,9 +114,8 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     for (var index = 0; index < toExplodeArray.length; index++) {
         toExplodeArray[index].material = sourceMat.subMaterials[index % 3];
     }
-    var toExplode = BABYLON.Mesh.MergeMeshes(toExplodeArray, undefined, undefined, undefined, undefined, true);
+    //var toExplode = BABYLON.Mesh.MergeMeshes(toExplodeArray, undefined, undefined, undefined, undefined, true);
     
-    newArray = BABYLON.Mesh.Explode([toExplode], undefined, true);
     /*
     toExplode.material = sourceMat;
     var absCenter = toExplode._boundingInfo.boundingBox.centerWorld;
