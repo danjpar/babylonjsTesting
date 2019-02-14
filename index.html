@@ -59,7 +59,7 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     sourceMat.subMaterials.push(sourceMat0, sourceMat1, sourceMat2)
     var newExplosion;
     BABYLON.SceneLoader.Append("./", "test.gltf", scene, function(loaded) {
-        newExplosion = new BABYLON.MeshExploder(loaded.meshes, loaded.meshes[0]);
+        newExplosion = new BABYLON.MeshExploder(loaded.meshes);
     });
 
     var renderLoop = function () {
