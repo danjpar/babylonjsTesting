@@ -23,7 +23,8 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     var slider = document.getElementById('slider');
     var lastPos = slider.value;
     slider.oninput = function() {
-        newExplosion.explode(slider.value*1);
+        newExplosion1.explode(slider.value*1);
+        newExplosion2.explode(slider.value*1);
     };
     
     var canvas = document.getElementById('render-canvas');
@@ -57,11 +58,49 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     var sourceMat2 = new BABYLON.StandardMaterial('sourceMat', scene);
     sourceMat2.diffuseColor = new BABYLON.Color3.Green();
     sourceMat.subMaterials.push(sourceMat0, sourceMat1, sourceMat2)
-    var newExplosion;
-    BABYLON.SceneLoader.Append("./", "test.gltf", scene, function(loaded) {
-        newExplosion = new BABYLON.MeshExploder(loaded.meshes);
-    });
+    //var newExplosion;
+    var assetsManager = new BABYLON.AssetsManager(scene);
+    var meshTask1 = assetsManager.addMeshTask("model1", "", "./", "test.gltf");
+    var meshTask2 = assetsManager.addMeshTask("model2", "", "./", "test2.gltf");
 
+    meshTask1.onSuccess = function(task) {
+        task.loadedMeshes[0].position.x += 5;
+        task.loadedMeshes.forEach((o) => {
+            o.setParent(null);
+        });
+        newExplosion1 = new BABYLON.MeshExploder(task.loadedMeshes);
+    }
+
+    meshTask2.onSuccess = function(task) {
+        task.loadedMeshes[0].position.x -= 5;
+        task.loadedMeshes.forEach((o) => {
+            o.setParent(null);
+        });
+        newExplosion2 = new BABYLON.MeshExploder(task.loadedMeshes);
+    }
+    meshTask1.onError = function (task, message, exception) {
+    console.log(message, exception);
+    }
+    meshTask2.onError = function (task, message, exception) {
+    console.log(message, exception);
+    }
+    assetsManager.load();
+/*
+    BABYLON.SceneLoader.Load("./", "test.gltf", engine, function(loaded) {
+        loaded.meshes[0].position.x -= 3;
+        loaded.meshes.forEach((o) => {
+            o.setParent(null);
+        });
+        newExplosion1 = new BABYLON.MeshExploder(loaded.meshes);
+    });
+    BABYLON.SceneLoader.Append("./", "test2.gltf", scene, function(loaded) {
+        loaded.meshes[0].position.x += 3;
+        loaded.meshes.forEach((o) => {
+            o.setParent(null);
+        });
+        newExplosion2 = new BABYLON.MeshExploder(loaded.meshes);
+    });
+*/
     var renderLoop = function () {
         scene.render();
     };
