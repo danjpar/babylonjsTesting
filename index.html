@@ -19,12 +19,12 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
 <script src="babylonjs.loaders.js"></script>
 
 <script>
-    var newArray;
     var slider = document.getElementById('slider');
     var lastPos = slider.value;
     slider.oninput = function() {
-        newExplosion1.explode(slider.value*1);
-        newExplosion2.explode(slider.value*1);
+        //newExplosion1.explode(slider.value*1);
+        //newExplosion2.explode(slider.value*1);
+        newExplosion3.explode(slider.value*1);
     };
     
     var canvas = document.getElementById('render-canvas');
@@ -44,8 +44,8 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
         light.position = camera.position.clone();
     });
 
-    var camera = new BABYLON.ArcRotateCamera('Camera', 0, 0, 10, new BABYLON.Vector3(0,0,0), scene);
-    camera.beta = Math.PI/2;
+    var camera = new BABYLON.ArcRotateCamera('Camera', 0, 0, 20, new BABYLON.Vector3(0,0,0), scene);
+    camera.beta = Math.PI/2 -.3;
     camera.alpha = Math.PI/2;
     camera.attachControl(canvas, false);
     camera.zoomingSensibility = 25;
@@ -58,34 +58,27 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     var sourceMat2 = new BABYLON.StandardMaterial('sourceMat', scene);
     sourceMat2.diffuseColor = new BABYLON.Color3.Green();
     sourceMat.subMaterials.push(sourceMat0, sourceMat1, sourceMat2)
-    //var newExplosion;
+    var newArray;
     var assetsManager = new BABYLON.AssetsManager(scene);
-    var meshTask1 = assetsManager.addMeshTask("model1", "", "./", "test.gltf");
-    var meshTask2 = assetsManager.addMeshTask("model2", "", "./", "test2.gltf");
+    //var meshTask1 = assetsManager.addMeshTask("model1", "", "./", "test.gltf");
+    //var meshTask2 = assetsManager.addMeshTask("model2", "", "./", "test2.gltf");
+    var meshTask3 = assetsManager.addMeshTask("model3", "", "./", "test3.gltf");
 
-    meshTask1.onSuccess = function(task) {
+    meshTask3.onSuccess = function(task) {
         task.loadedMeshes[0].position.x += 5;
-        task.loadedMeshes.forEach((o) => {
-            o.setParent(null);
-        });
-        newExplosion1 = new BABYLON.MeshExploder(task.loadedMeshes);
-    }
-
-    meshTask2.onSuccess = function(task) {
-        task.loadedMeshes[0].position.x -= 5;
-        task.loadedMeshes.forEach((o) => {
-            o.setParent(null);
-        });
-        newExplosion2 = new BABYLON.MeshExploder(task.loadedMeshes);
-    }
-    meshTask1.onError = function (task, message, exception) {
-    console.log(message, exception);
-    }
-    meshTask2.onError = function (task, message, exception) {
-    console.log(message, exception);
+        newExplosion3 = new BABYLON.MeshExploder(task.loadedMeshes);
     }
     assetsManager.load();
+
 /*
+    meshTask1.onSuccess = function(task) {
+        task.loadedMeshes[0].position.x += 5;
+        newExplosion1 = new BABYLON.MeshExploder(task.loadedMeshes, task.loadedMeshes[0]);
+    }
+    meshTask2.onSuccess = function(task) {
+        task.loadedMeshes[0].position.x -= 5;
+        newExplosion2 = new BABYLON.MeshExploder(task.loadedMeshes);
+    }
     BABYLON.SceneLoader.Load("./", "test.gltf", engine, function(loaded) {
         loaded.meshes[0].position.x -= 3;
         loaded.meshes.forEach((o) => {
