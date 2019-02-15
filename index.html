@@ -65,12 +65,15 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     var meshTask3 = assetsManager.addMeshTask("model3", "", "./", "test3.gltf");
 
     meshTask3.onSuccess = function(task) {
-        task.loadedMeshes[0].position.x += 5;
-        newExplosion3 = new BABYLON.MeshExploder(task.loadedMeshes);
+        newExplosion3 = new BABYLON.MeshExploder(task.loadedMeshes, task.loadedMeshes[0]);
     }
     assetsManager.load();
 
 /*
+    meshTask2.onSuccess = function(task) {
+        task.loadedMeshes[0].position.x -= 5;
+        newExplosion2 = new BABYLON.MeshExploder(task.loadedMeshes);
+    }
     meshTask1.onSuccess = function(task) {
         task.loadedMeshes[0].position.x += 5;
         newExplosion1 = new BABYLON.MeshExploder(task.loadedMeshes, task.loadedMeshes[0]);
