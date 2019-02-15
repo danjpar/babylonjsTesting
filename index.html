@@ -65,7 +65,7 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     var meshTask3 = assetsManager.addMeshTask("model3", "", "./", "test3.gltf");
 
     meshTask3.onSuccess = function(task) {
-        newExplosion3 = new BABYLON.MeshExploder(task.loadedMeshes, task.loadedMeshes[0]);
+        newExplosion3 = new BABYLON.MeshExploder(task.loadedMeshes);
     }
     assetsManager.load();
 
