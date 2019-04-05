@@ -51,9 +51,9 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     cube.position.z = Math.cos(alpha)*10;
     cube.computeWorldMatrix(true);
 
-    var trail = new BABYLON.TrailMesh('new', cube, scene, [0.5,3], 60, true);
+    var trail = new BABYLON.TrailMesh('new', cube, scene, [0.5,3], 80, true);
     var sourceMat = new BABYLON.StandardMaterial('sourceMat', scene);
-    sourceMat.emissiveColor = 
+    //sourceMat.emissiveColor = 
     sourceMat.diffuseColor = new BABYLON.Color3.Red();
     sourceMat.specularColor = new BABYLON.Color3.Black();
     sourceMat.backFaceCulling = false;
@@ -63,7 +63,7 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     function animate() {
         alpha += Math.PI/120;
         cube.position.x = Math.sin(alpha)*10;
-        //cube.position.z = Math.cos(alpha)*10;
+        cube.position.z = Math.cos(alpha)*10;
         //cube.rotation.x = Math.PI*alpha/2;
         //cube.rotation.y = alpha;
     }
