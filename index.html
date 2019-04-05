@@ -10,22 +10,12 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
 </style>
 </head>
 <body>
-<div id='slidecontainer'>
-<input id='slider' type='range' min='-5' max='5' value='0' step='0.1'>
-</div>
 <canvas id='render-canvas'></canvas>
 
 <script src='babylon.max.js'></script>
 <script src="babylonjs.loaders.js"></script>
 
 <script>
-    var slider = document.getElementById('slider');
-    var lastPos = slider.value;
-    slider.oninput = function() {
-        //newExplosion1.explode(slider.value*1);
-        //newExplosion2.explode(slider.value*1);
-        newExplosion3.explode(slider.value*1);
-    };
     
     var canvas = document.getElementById('render-canvas');
     window.onresize = function(){
@@ -50,6 +40,46 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     camera.attachControl(canvas, false);
     camera.zoomingSensibility = 25;
     camera.panningSensibility = 50;
+
+
+    var alpha = Math.PI;
+    // Create a mesh for the trail to follow.
+    var cube = BABYLON.Mesh.CreateBox('cube', 1, scene);
+    cube.scaling.y = 6;
+    cube.bakeCurrentTransformIntoVertices();
+    cube.position.x = Math.sin(alpha)*10;
+    cube.position.z = Math.cos(alpha)*10;
+    cube.computeWorldMatrix(true);
+
+    var trail = new BABYLON.TrailMesh('new', cube, scene, [0.5,3], 60, true);
+    var sourceMat = new BABYLON.StandardMaterial('sourceMat', scene);
+    sourceMat.emissiveColor = 
+    sourceMat.diffuseColor = new BABYLON.Color3.Red();
+    sourceMat.specularColor = new BABYLON.Color3.Black();
+    sourceMat.backFaceCulling = false;
+    trail.material = sourceMat;
+
+    observer = scene.onBeforeRenderObservable.add(animate);
+    function animate() {
+        alpha += Math.PI/120;
+        cube.position.x = Math.sin(alpha)*10;
+        //cube.position.z = Math.cos(alpha)*10;
+        //cube.rotation.x = Math.PI*alpha/2;
+        //cube.rotation.y = alpha;
+    }
+
+
+/*  
+    var slider = document.getElementById('slider');
+    var lastPos = slider.value;
+    slider.oninput = function() {
+        //newExplosion1.explode(slider.value*1);
+        //newExplosion2.explode(slider.value*1);
+        newExplosion3.explode(slider.value*1);
+    };
+<div id='slidecontainer'>
+<input id='slider' type='range' min='-5' max='5' value='0' step='0.1'>
+</div>
     var sourceMat = new BABYLON.MultiMaterial('sourceMat', scene);
     var sourceMat0 = new BABYLON.StandardMaterial('sourceMat', scene);
     sourceMat0.diffuseColor = new BABYLON.Color3.Black();
@@ -59,7 +89,33 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     sourceMat2.diffuseColor = new BABYLON.Color3.Green();
     sourceMat.subMaterials.push(sourceMat0, sourceMat1, sourceMat2)
 
+  
+    var assetsManager = new BABYLON.AssetsManager(scene);
+    //var meshTask1 = assetsManager.addMeshTask("model1", "", "./", "test.gltf");
+    //var meshTask2 = assetsManager.addMeshTask("model2", "", "./", "test.gltf");
+    var meshTask3 = assetsManager.addMeshTask("model3", "", "./", "test3.gltf");
+    var meshes3;
+    meshTask3.onSuccess = function(task) {
+        meshes3 = task.loadedMeshes;
+    }
+    assetsManager.load();
     
+    scene.executeWhenReady(function() {
+        newExplosion3 = new BABYLON.MeshExploder(meshes3, meshes3[0]);
+    });
+    
+        var meshes2;
+        meshTask2.onSuccess = function(task) {
+        meshes2 = task.loadedMeshes;
+        task.loadedMeshes[0].position.x -= 5;
+    }
+    BABYLON.SceneLoader.Append("./", "test3.gltf", scene, function(loaded) {
+        newExplosion3 = new BABYLON.MeshExploder(loaded.meshes);
+    });
+    BABYLON.SceneLoader.Append("./", "test.gltf", scene, function(loaded) {
+        loaded.meshes[0].position.x += 10;
+        newExplosion2 = new BABYLON.MeshExploder(loaded.meshes);
+    });
     var newArray;
     var assetsManager = new BABYLON.AssetsManager(scene);
     //var meshTask1 = assetsManager.addMeshTask("model1", "", "./", "test.gltf");
@@ -71,7 +127,6 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     }
     assetsManager.load();
 
-/*
     meshTask2.onSuccess = function(task) {
         task.loadedMeshes[0].position.x -= 5;
         newExplosion2 = new BABYLON.MeshExploder(task.loadedMeshes);
