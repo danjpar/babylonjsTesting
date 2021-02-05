@@ -25,48 +25,83 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     var engine = new BABYLON.Engine(canvas);
     engine.enableOfflineSupport = false;
 
+
     var scene = new BABYLON.Scene(engine);
     scene.clearColor = new BABYLON.Color3(0.8, 0.8, 0.8);
 
-    var light = new BABYLON.PointLight('Omni', new BABYLON.Vector3(0, 0, 0), scene);
+    const camera = new BABYLON.ArcRotateCamera("Camera", -2, 1, 15, BABYLON.Vector3.Zero());
+    camera.attachControl(canvas, true);
 
-    scene.onBeforeRenderObservable.add(function () {     
-        light.position = camera.position.clone();
+    const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+    light.intensity = 0.7;
+
+    const centerShape = BABYLON.MeshBuilder.CreateBox('', { size:1 }, scene);
+    //toExplodeArray.push(sphere1);
+
+    const fs = 30;
+    const anim = new BABYLON.Animation("", "rotation.y", fs, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+    anim.setKeys( [{ frame: 0, value:0}, {frame: 100, value: Math.PI*2}] );
+    centerShape.animations = [anim];
+
+    const smallCount = 6;
+    const circle = Math.PI*2;
+    const deltaAngle = (circle / smallCount);
+    const radius = 2;
+
+    toExplodeArray = [];
+    var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:0.25}, scene);
+    sphere.position.z = 2;
+    sphere.parent = centerShape;
+    var sphereTranslate = sphere.position.subtract(centerShape.position);
+    sphere.setPivotMatrix(BABYLON.Matrix.Translation(sphereTranslate.x, sphereTranslate.y, sphereTranslate.z));
+
+    for (let i=0; i<smallCount; i++) {
+
+        let angle = i * deltaAngle;
+        let x = (radius * Math.cos(angle));
+        let z = (radius * Math.sin(angle));
+
+        const s = BABYLON.MeshBuilder.CreateBox('', { size:.5 }, scene);
+        s.parent = centerShape; // this will cause small cubes to rotate with the parent
+        s.position.z = z;
+        s.position.x = x;
+        toExplodeArray.push(s);
+    }
+
+    explosion = new BABYLON.MeshExploder(toExplodeArray, centerShape);
+
+    //scene.beginAnimation(centerShape, 0, 100, true);
+
+    let angle = 0;
+    scene.registerBeforeRender(function () {
+        // comment out the 'explode' line to see small boxes rotating with the center box
+        // the explosion will rotate the smaller boxes, why?
+        explosion.explode(1 + Math.cos(angle));
+        angle += 0.05;
+        centerShape.position.y = 1 + Math.cos(angle);
+        centerShape.rotate(new BABYLON.Vector3(0,1,0), 0.02, BABYLON.Space.LOCAL)
     });
 
-    var camera = new BABYLON.ArcRotateCamera('Camera', 0, 0, 20, new BABYLON.Vector3(0,0,0), scene);
-    camera.beta = Math.PI/2 -.3;
-    camera.alpha = Math.PI/4;
-    camera.attachControl(canvas, false);
-    camera.zoomingSensibility = 25;
-    camera.panningSensibility = 50;
 
 
-    var alpha = Math.PI;
-    // Create a mesh for the trail to follow.
-    var cube = BABYLON.Mesh.CreateBox('cube', 1, scene);
-    cube.scaling.x = 6;
-    cube.bakeCurrentTransformIntoVertices();
-    cube.position.x = Math.sin(alpha)*10;
-    cube.position.z = Math.cos(alpha)*10;
-    cube.computeWorldMatrix(true);
 
-    var trail = new BABYLON.TrailMesh('new', cube, scene, 3, 60, true);
-    var sourceMat = new BABYLON.StandardMaterial('sourceMat', scene);
-    sourceMat.emissiveColor = 
-    sourceMat.diffuseColor = new BABYLON.Color3.Red();
-    sourceMat.specularColor = new BABYLON.Color3.Black();
-    sourceMat.backFaceCulling = false;
-    trail.material = sourceMat;
 
-    observer = scene.onBeforeRenderObservable.add(animate);
-    function animate() {
-        alpha += Math.PI/120;
-        cube.position.x = Math.sin(alpha)*10;
-        cube.position.z = Math.cos(alpha)*10;
-        cube.rotation.y = Math.PI*alpha/2;
-        cube.rotation.z = alpha;
-    }
+
+
+
+    var renderLoop = function () {
+        scene.render();
+    };
+    engine.runRenderLoop(renderLoop);
+
+</script>
+
+</body>
+</html>
+
+
+<!--
+
 
 
 /*  
@@ -154,18 +189,7 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
         newExplosion2 = new BABYLON.MeshExploder(loaded.meshes);
     });
 */
-    var renderLoop = function () {
-        scene.render();
-    };
-    engine.runRenderLoop(renderLoop);
 
-</script>
-
-</body>
-</html>
-
-
-<!--
 
 
 <babylon>
