@@ -13,7 +13,6 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
 <canvas id='render-canvas'></canvas>
 
 <script src='babylon.max.js'></script>
-<script src="babylonjs.loaders.js"></script>
 
 <script>
     
@@ -52,8 +51,6 @@ html,body,canvas { margin: 0; padding: 0; width: 100%; height: 100%; font-size: 
     var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:0.25}, scene);
     sphere.position.z = 2;
     sphere.parent = centerShape;
-    var sphereTranslate = sphere.position.subtract(centerShape.position);
-    sphere.setPivotMatrix(BABYLON.Matrix.Translation(sphereTranslate.x, sphereTranslate.y, sphereTranslate.z));
 
     for (let i=0; i<smallCount; i++) {
 
